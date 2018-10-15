@@ -43,6 +43,49 @@ app.post('/api/exercise/new-user', (req, res) => {
   }
 });
 
+app.post('/api/exercise/add', (req, res) => {
+  if(req.body &&
+     req.body.userId &&
+     req.body.description &&
+     req.body.duration) {
+    
+    let postDate = Date.now();
+    if (req.body.date) { postDate = Date.parse(req.body.date) }
+    
+    User.findById(req.body.userId, function(err, user) {
+      if(err) {
+        res.sendStatus(404);
+        console.log(err);
+        return;
+      }
+
+      const new_exercise = {
+        description: req.body.description,
+        duration: req.body.duration,
+        postDate: postDate
+      }
+
+      user.exercises.push(new_exercise);
+
+      user.save(function(err) {
+        if (err) {
+          res.sendStatus(500);
+          console.log(err);
+          return;
+        }
+
+        res.json({
+          ...new_exercise,
+          _id: user._id,
+          username: user.username
+        });
+      });
+    });
+  } else {
+    res.sendStatus(400);
+  }
+});
+
 app.get('/api/exercise/users', (req, res) => {
   if(req.body && req.body.username) {
     User.findOne({ username: req.body.username }, function(err, user_document) {
@@ -53,7 +96,7 @@ app.get('/api/exercise/users', (req, res) => {
       }
 
       if (user_document !== null) {
-        User.find({}, function(err, users) {
+        User.find({}).select("_id username", function(err, users) {
           res.json(users);
         });
       } else {
@@ -64,6 +107,8 @@ app.get('/api/exercise/users', (req, res) => {
     res.sendStatus(403);
   }
 });
+
+app.get('/api/exercise/log')
 
 // Not found middleware
 app.use((req, res, next) => {
