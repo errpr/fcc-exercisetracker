@@ -7,8 +7,9 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 
 const mongoose = require('mongoose');
+mongoose.Promise = Promise; // REALLY???
 const dbUrl = `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DB}`;
-mongoose.connect(dbUrl).catch(error => console.log(error));
+mongoose.connect(dbUrl, { useMongoClient: true }).catch(error => console.log(error));
 
 const User = require("./models/user.js");
 app.use(cors())
