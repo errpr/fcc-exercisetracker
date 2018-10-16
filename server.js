@@ -87,8 +87,8 @@ app.post('/api/exercise/add', (req, res) => {
 });
 
 app.get('/api/exercise/users', (req, res) => {
-  if(req.body && req.body.username) {
-    User.findOne({ username: req.body.username }, function(err, user_document) {
+  if(req.query && req.query.username) {
+    User.findOne({ username: req.query.username }, function(err, user_document) {
       if (err) {
         res.sendStatus(500);
         console.log(err);
@@ -108,7 +108,45 @@ app.get('/api/exercise/users', (req, res) => {
   }
 });
 
-app.get('/api/exercise/log')
+app.get('/api/exercise/log', (req, res) => {
+  console.log(req);
+  if(req.query && req.query.userId) {
+    let fromDate = new Date(0);
+    let toDate = Date.now()
+    let limit = Infinity;
+    
+    if (req.query.from) fromDate = Date.parse(req.query.from);
+    if (req.query.to) toDate = Date.parse(req.query.to);
+    if (req.query.limit) limit = Number.parseInt(req.query.limit);
+
+    User.findById(req.query.userId, function(err, user) {
+      if(err) {
+        res.sendStatus(500);
+        console.log(err);
+        return;
+      }
+
+      if(user === null) {
+        res.sendStatus(404);
+        return;
+      }
+
+      exercise_log = user.exercises
+                        .filter(e => e.postDate >= fromDate)
+                        .filter(e => e.postDate <= toDate)
+                        .sort((a, b) => b.postDate - a.postDate)
+                        .slice(0, limit);
+      res.json({
+        log: exercise_log,
+        count: exercise_log.length,
+        username: user.username,
+        _id: user._id
+      });
+    });
+  } else {
+    res.sendStatus(403);
+  }
+});
 
 // Not found middleware
 app.use((req, res, next) => {
