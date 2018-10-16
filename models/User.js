@@ -10,6 +10,6 @@ let exerciseSchema = new Schema({
 let userSchema = new Schema({
     username: { type: String, required: true, index: { unique: true } },
     exercises: { type: [exerciseSchema] }, 
-}, { usePushEach: true });
+}, { usePushEach: true, collection: 'exercise_users' });
 
 module.exports = mongoose.model("User", userSchema);

@@ -11,7 +11,7 @@ mongoose.Promise = Promise; // REALLY???
 const dbUrl = `mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DB}`;
 mongoose.connect(dbUrl, { useMongoClient: true }).catch(error => console.log(error));
 
-const User = require("./models/user.js");
+const User = require("./models/User.js");
 app.use(cors())
 
 app.use(bodyParser.urlencoded({extended: false}))
@@ -96,7 +96,7 @@ app.get('/api/exercise/users', (req, res) => {
       }
 
       if (user_document !== null) {
-        User.find({}).select("_id username", function(err, users) {
+        User.find({}).select("_id username").exec(function(err, users) {
           res.json(users);
         });
       } else {
@@ -109,7 +109,6 @@ app.get('/api/exercise/users', (req, res) => {
 });
 
 app.get('/api/exercise/log', (req, res) => {
-  console.log(req);
   if(req.query && req.query.userId) {
     let fromDate = new Date(0);
     let toDate = Date.now()
